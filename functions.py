@@ -16,7 +16,6 @@ def user_menu():
 def team_finder():
     import requests
     team = input("\nInsert your team's name>>")
-
     response = requests.get(
         "https://api-nba-v1.p.rapidapi.com/teams?search=" + team,
         headers={
@@ -24,14 +23,30 @@ def team_finder():
             'x-rapidapi-key': "1e5e5821femsh450b4f3086376a6p114414jsne8cc7f313f90"
         }
     )
-
     status_code = response.status_code
-
     if status_code == 200:
         json = response.json()
-        # print(json['response']) -- permite ver todos los atributos
         for team in json['response']:
             return team['id']
+    else:
+        print('Error')
+
+
+def team_id_finder(id):
+    import requests
+    response = requests.get(
+        "https://api-nba-v1.p.rapidapi.com/teams?id=" + id,
+        headers={
+            'x-rapidapi-host': "api-nba-v1.p.rapidapi.com",
+            'x-rapidapi-key': "1e5e5821femsh450b4f3086376a6p114414jsne8cc7f313f90"
+        }
+    )
+    status_code = response.status_code
+    if status_code == 200:
+        json = response.json()
+        for team in json['response']:
+            name = team["name"]
+            return f'\nOk lets find you a player from the {name.upper()}'
     else:
         print('Error')
 

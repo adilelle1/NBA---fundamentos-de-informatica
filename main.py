@@ -1,13 +1,16 @@
 import requests
 
-from functions import welcome, team_finder, player_stats, print_stats
+from functions import welcome, team_finder, team_id_finder, player_stats, print_stats
 
 while True:
     welcome()
     team = str(team_finder())
+    print(team_id_finder(team))
 
     # defino lista vacia para appendear diccionarios con las stats de los jugadores que cumplen los filtros ------------
     searched_players_stats = []
+
+    searched_players = []
 
     # attributes --------------------------------------------------------------------------------------
     print('\nInsert your player attributes:')
@@ -32,6 +35,8 @@ while True:
     min_steals = int(input('\t\tMinimum steals:'))
     min_turnovers = int(input('\t\tMaximum turnovers:'))
     min_blocks = int(input('\t\tMinimum blocks:'))
+
+    print('\nProcessing...')
 
     # buscamos los jugadores que cumplan con los filtros de atributos y los appendeamos a una lista de diccionarios
     # calculando para cada uno el promedio por temporada de sus estadísticas usando la funcion player_stats
@@ -79,5 +84,6 @@ while True:
                 and player['steals'] >= min_steals \
                 and player['turnovers'] <= min_turnovers \
                 and player['blocks'] >= min_blocks:
-            print('\nThese players match your request:')
-            print(print_stats(player))
+            print_stats(player)
+
+    print('\n---------------------------------\n\n')
