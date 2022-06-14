@@ -1,25 +1,27 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
+import requests
+import statistics
+from players import Players
+from functions import team_finder
+from teams import Teams
 
 app = Flask(__name__)
 
 
 #
 # [GET] Estadistica de equipo por temporada
-# Preguntar como puedo pasarle como parametros en el postman el search para team id y la season
 
 @app.route('/teams', methods=['GET'])
 def team_finder():
-    import requests
-    from teams import Teams
+    search = request.args.get("search")
+    season = request.args.get('season')
+
     response1 = requests.get(
-        "https://api-nba-v1.p.rapidapi.com/teams?",
+        "https://api-nba-v1.p.rapidapi.com/teams?search=" + search,
         headers={
             'x-rapidapi-host': "api-nba-v1.p.rapidapi.com",
             'x-rapidapi-key': "1e5e5821femsh450b4f3086376a6p114414jsne8cc7f313f90"
-        },
-        params={'search': 'miami'}
-        #         params={'search': search_team}
-
+        }
     )
     status_code = response1.status_code
     if status_code == 200:
@@ -32,14 +34,13 @@ def team_finder():
                     team_name = value
                 elif key == 'city':
                     team_city = value
-    season = '2020'
+
     response2 = requests.get(
-        "https://api-nba-v1.p.rapidapi.com/teams/statistics?id=" + team_id,
+        "https://api-nba-v1.p.rapidapi.com/teams/statistics?season=" + str(season) + "&id=" + str(team_id),
         headers={
             'x-rapidapi-host': "api-nba-v1.p.rapidapi.com",
             'x-rapidapi-key': "1e5e5821femsh450b4f3086376a6p114414jsne8cc7f313f90"
-        },
-        params={'season': season}
+        }
     )
     status_code = response2.status_code
     if status_code == 200:
@@ -49,28 +50,22 @@ def team_finder():
                 if key == 'games':
                     games = value
                 elif key == 'points':
-                    points = value / games
+                    points = round(value / games, 2)
                 elif key == 'totReb':
-                    rebounds = value / games
+                    rebounds = round(value / games, 2)
                 elif key == 'assists':
-                    assists = value / games
+                    assists = round(value / games, 2)
     team = Teams(team_id, team_name, team_city, season, games, points, rebounds, assists)
     return jsonify({'team': team.__dict__, 'status': 'ok'})
 
 #
 # [GET] Estadísticas de jugadores por equipo y temporada
-# Preguntar como puedo pasarle como parametros en el postman el search para team id y la season
 
 @app.route('/players', methods=['GET'])
 def player_finder():
-    import requests
-    import statistics
-    from players import Players
-    from functions import team_finder
-
     searched_players = []
-    season = '2020'
-    team = str(team_finder('golden'))
+    season = request.args.get('season')
+    team = team_finder(request.args.get('search'))
     fgp_per_game = []
     tpp_per_game = []
     points_per_game = []
@@ -80,7 +75,7 @@ def player_finder():
     steals_per_game = []
     turnovers_per_game = []
 
-    http_rsp_player = requests.get("https://api-nba-v1.p.rapidapi.com/players?season=" + season + "&team=" + team,
+    http_rsp_player = requests.get("https://api-nba-v1.p.rapidapi.com/players?season=" + str(season) + "&team=" + str(team),
                                    headers={
                                        'x-rapidapi-host': "api-nba-v1.p.rapidapi.com",
                                        'x-rapidapi-key': "1e5e5821femsh450b4f3086376a6p114414jsne8cc7f313f90"
@@ -100,7 +95,7 @@ def player_finder():
                 weight = player_dict['weight']['kilograms']
 
                 http_rsp_stats = requests.get(
-                    "https://api-nba-v1.p.rapidapi.com/players/statistics?season=2020&team=" + team,
+                    "https://api-nba-v1.p.rapidapi.com/players/statistics?season=" + str(season) + "&team=" + str(team),
                     headers={
                         'x-rapidapi-host': "api-nba-v1.p.rapidapi.com",
                         'x-rapidapi-key': "74cff2d19bmshc82b77265cf59c6p179774jsnc9d690a6ad65"
@@ -151,3 +146,4 @@ def player_finder():
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
+
