@@ -1,7 +1,7 @@
 import requests
 import statistics
-from players import Players
-from functions import team_finder, team_id_finder, player_stats, print_stats
+from src.models.players import Players
+from src.functions import team_finder
 
 searched_players = []
 counter = 0

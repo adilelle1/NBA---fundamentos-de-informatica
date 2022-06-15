@@ -1,9 +1,9 @@
 from flask import Flask, jsonify, request
 import requests
 import statistics
-from players import Players
-from functions import team_finder
-from teams import Teams
+from src.models.players import Players
+from src.functions import team_finder
+from src.models.teams import Teams
 
 app = Flask(__name__)
 
@@ -58,6 +58,7 @@ def team_finder():
     team = Teams(team_id, team_name, team_city, season, games, points, rebounds, assists)
     return jsonify({'team': team.__dict__, 'status': 'ok'})
 
+
 #
 # [GET] Estadísticas de jugadores por equipo y temporada
 
@@ -75,11 +76,12 @@ def player_finder():
     steals_per_game = []
     turnovers_per_game = []
 
-    http_rsp_player = requests.get("https://api-nba-v1.p.rapidapi.com/players?season=" + str(season) + "&team=" + str(team),
-                                   headers={
-                                       'x-rapidapi-host': "api-nba-v1.p.rapidapi.com",
-                                       'x-rapidapi-key': "1e5e5821femsh450b4f3086376a6p114414jsne8cc7f313f90"
-                                   })
+    http_rsp_player = requests.get(
+        "https://api-nba-v1.p.rapidapi.com/players?season=" + str(season) + "&team=" + str(team),
+        headers={
+            'x-rapidapi-host': "api-nba-v1.p.rapidapi.com",
+            'x-rapidapi-key': "1e5e5821femsh450b4f3086376a6p114414jsne8cc7f313f90"
+        })
     status_code_2 = http_rsp_player.status_code
 
     if status_code_2 == 200:
@@ -146,4 +148,3 @@ def player_finder():
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
-
