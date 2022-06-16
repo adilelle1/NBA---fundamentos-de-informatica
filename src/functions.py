@@ -1,18 +1,3 @@
-def welcome():
-    print('\t\t*********************************')
-    print('\t\t* Welcome to your player finder *')
-    print('\t\t*********************************')
-
-
-def user_menu():
-    print('---------------------'
-          'Main menu:'
-          '\t(1) Find a player by its attributes and stats'
-          '\t(2) Find player stats by team'
-          '\t(3) Quit'
-          '---------------------')
-
-
 def team_finder(team_name):
     import requests
     search = team_name

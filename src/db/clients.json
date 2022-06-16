@@ -1,0 +1,48 @@
+[
+  {
+    "client_id": "0000111",
+    "first_name": "Alejo",
+    "last_name": "Di Lelle",
+    "date_of_birth": "12/11/1998",
+    "email": "lmoon@mail.com",
+    "subscription_info": {
+      "type": "Yearly",
+      "start_date": "11/07/2022",
+      "expiry_date": "11/07/2023",
+      "active": "true"
+    },
+    "client_status": "ACTIVE",
+    "category": "All Star"
+  },
+  {
+    "client_id": "0000112",
+    "first_name": "Kevin",
+    "last_name": "Harnan",
+    "date_of_birth": "12/08/2000",
+    "email": "kh@mail.com",
+    "subscription_info": {
+      "type": "Monthly",
+      "start_date": "11/08/2022",
+      "expiry_date": "11/09/2023",
+      "active": "true"
+    },
+    "client_status": "ACTIVE",
+    "category": "Hall of Fame"
+  },
+  {
+    "client_id": "0000113",
+    "first_name": "Ignacio",
+    "last_name": "Freira",
+    "date_of_birth": "12/06/2001",
+    "email": "nfreira@mail.com",
+    "subscription_info": {
+      "type": "Free Trial",
+      "start_date": "11/05/2022",
+      "expiry_date": "11/06/2023",
+      "active": "false"
+    },
+    "client_status": "INACTIVE",
+    "category": "Rookie"
+
+  }
+]

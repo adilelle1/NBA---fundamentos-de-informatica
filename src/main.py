@@ -4,15 +4,18 @@ import statistics
 from src.models.players import Players
 from src.functions import team_finder
 from src.models.teams import Teams
+from src.models.clients import Client, Subscription
+from db.client_loader import load_clients
 
 app = Flask(__name__)
+clients: list = load_clients()
 
 
 #
 # [GET] Estadistica de equipo por temporada
 
-@app.route('/teams', methods=['GET'])
-def team_finder():
+@app.route('/api/NBA/teams', methods=['GET'])
+def get_team():
     search = request.args.get("search")
     season = request.args.get('season')
 
@@ -62,8 +65,8 @@ def team_finder():
 #
 # [GET] Estadísticas de jugadores por equipo y temporada
 
-@app.route('/players', methods=['GET'])
-def player_finder():
+@app.route('/api/NBA/players', methods=['GET'])
+def get_player():
     searched_players = []
     season = request.args.get('season')
     team = team_finder(request.args.get('search'))
@@ -144,6 +147,56 @@ def player_finder():
 
     for player in searched_players:
         return jsonify({'players': player.__dict__, 'status': 'ok'})
+
+
+#
+# [POST] Crear clientes
+
+@app.route("/api/NBA/clients/", methods=['POST'])
+def create_client():
+    client = request.json
+
+    try:
+        new_client = Client(
+            client['client_id'],
+            client['first_name'],
+            client['last_name'],
+            client['date_of_birth'],
+            client['email'],
+            Subscription(
+                client['subscription_info']['type'],
+                client['subscription_info']['start_date'],
+                client['subscription_info']['expiry_date'],
+                client['subscription_info']['active'],
+            ),
+            client['client_status'],
+            client['category']
+        )
+
+        clients.append(new_client)
+
+    except KeyError as key_err:
+        missing_param = (key_err.__str__())
+        return jsonify(
+            error_code=400,
+            error_description="Bad request",
+            error_body=missing_param
+        ), 400
+
+    return jsonify(new_client.serialize())
+
+
+#
+# [PUT] Actualizar la categoria del cliente
+
+@app.route("/api/NBA/clients/category", methods=['PUT'])
+def upgrade_client_category():
+    clients = load_clients()
+    client_id = request.args.get('client_id')
+    new_category = request.args.get('new_category')
+    for client in clients:
+        if clients['client_id'] == client_id:
+            Client.category_upgrade(client, new_category)
 
 
 if __name__ == '__main__':
