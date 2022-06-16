@@ -1,11 +1,11 @@
 import json
-from src.models.clients import Subscription, Rookie, AllStar, HallOfFame
+from src.models.clients import Rookie, AllStar, HallOfFame
 
 
 def load_clients():
     clients = []
 
-    with open('src/db/clients.json', 'r') as file:
+    with open(r'C:\Users\alejo\trabajo practico fund info 2022\src\db\clients.json', 'r') as file:
         clients_json = json.load(file)
         for client in clients_json:
             if client['category'] == 'Rookie':
@@ -16,14 +16,9 @@ def load_clients():
                         client['last_name'],
                         client['date_of_birth'],
                         client['email'],
-                        Subscription(
-                            client['subscription_info']['type'],
-                            client['subscription_info']['start_date'],
-                            client['subscription_info']['expiry_date'],
-                            client['subscription_info']['active'],
-                        ),
                         client['client_status'],
-                        client['category']
+                        client['category'],
+                        client['subscription_info']
                     )
                 )
             elif client['category'] == 'All Star':
@@ -34,14 +29,9 @@ def load_clients():
                         client['last_name'],
                         client['date_of_birth'],
                         client['email'],
-                        Subscription(
-                            client['subscription_info']['type'],
-                            client['subscription_info']['start_date'],
-                            client['subscription_info']['expiry_date'],
-                            client['subscription_info']['active'],
-                        ),
                         client['client_status'],
-                        client['category']
+                        client['category'],
+                        client['subscription_info']
                     )
                 )
             elif client['category'] == 'Hall of Fame':
@@ -52,14 +42,9 @@ def load_clients():
                         client['last_name'],
                         client['date_of_birth'],
                         client['email'],
-                        Subscription(
-                            client['subscription_info']['type'],
-                            client['subscription_info']['start_date'],
-                            client['subscription_info']['expiry_date'],
-                            client['subscription_info']['active'],
-                        ),
                         client['client_status'],
-                        client['category']
+                        client['category'],
+                        client['subscription_info']
                     )
                 )
     return clients
