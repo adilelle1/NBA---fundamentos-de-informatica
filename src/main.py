@@ -1,15 +1,17 @@
 import statistics
-
 from flask import Flask, jsonify, request
 import requests
+
+from src.db.client_store import store_client_file
 from src.models.players import Players, PlayerStats
-from src.functions import team_finder, create_player_stats
+from src.team_id_finder import team_finder
 from src.models.teams import Teams
 from src.models.clients import Client
 from db.client_loader import load_clients
 
 app = Flask(__name__)
-clients: list = load_clients()
+clients = load_clients()
+players = []
 
 
 #
@@ -60,13 +62,11 @@ def get_team():
                 elif key == 'assists':
                     assists = round(value / games, 2)
     team = Teams(team_id, team_name, team_city, season, games, points, rebounds, assists)
-    return jsonify({'team': team.__dict__, 'status': 'ok'})
+    return jsonify({'team': team.serialize(), 'status': 'ok'})
 
 
 #
 # [GET] Jugadores por equipo y temporada
-players = []
-
 
 @app.route('/api/NBA/players', methods=['GET'])
 def get_player():
@@ -85,18 +85,18 @@ def get_player():
         json = http_rsp_player.json()
         for player_dict in json['response']:
             try:
-                player_id = player_dict['id']
-                firstname = player_dict['firstname']
-                lastname = player_dict['lastname']
-                birth = player_dict['birth']['date']
-                country = player_dict['birth']['country']
-                pro_years = player_dict['nba']['pro']
-                height = player_dict['height']['meters']
-                weight = player_dict['weight']['kilograms']
-
-                player = Players(player_id, firstname, lastname, birth, country, pro_years, height, weight)
-                players.append(player)
-
+                players.append(
+                    Players(
+                        player_dict['id'],
+                        player_dict['firstname'],
+                        player_dict['lastname'],
+                        player_dict['birth']['date'],
+                        player_dict['birth']['country'],
+                        player_dict['nba']['pro'],
+                        player_dict['height']['meters'],
+                        player_dict['weight']['kilograms']
+                    )
+                )
             except TypeError:
                 continue
 
@@ -164,7 +164,7 @@ def get_player_stats():
         player_stats = PlayerStats(player_firstname, player_lastname, team, season, position, points, fg_percentage,
                                    tp_percentage, rebounds, assists, steals, turnovers, blocks)
 
-        return jsonify(player_stats.serialize())
+        return jsonify({'players': player_stats.serialize(), 'status': 'ok'})
 
 
 #
@@ -172,7 +172,19 @@ def get_player_stats():
 
 @app.route("/api/NBA/clients/", methods=['GET'])
 def get_all_clients():
-    return jsonify([cli.serialize() for cli in clients])
+    return jsonify({'players': [cli.serialize() for cli in clients], 'status': 'ok'})
+
+
+#
+# [GET] Clientes por id
+
+@app.route("/api/NBA/clients/<clients_id>", methods=['GET'])
+def get_client(clients_id):
+    for client in clients:
+        if client.client_id == clients_id:
+            return jsonify({'players': client.serialize(), 'status': 'ok'})
+
+    return jsonify({})
 
 
 #
@@ -204,7 +216,7 @@ def create_client():
             error_body=missing_param
         ), 400
 
-    return jsonify(new_client.__dict__)
+    return jsonify(new_client.serialize())
 
 
 #

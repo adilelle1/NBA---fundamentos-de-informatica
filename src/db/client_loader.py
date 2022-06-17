@@ -50,4 +50,4 @@ def load_clients():
     return clients
 
 
-print(load_clients())
+

@@ -1,61 +1,45 @@
+from flask import Flask, jsonify, request
 import requests
-import statistics
-from src.models.players import PlayerStats
+from src.models.players import Players
+from src.team_id_finder import team_finder
 
-season = 2020
-id = 75
-player_stats_list = []
-fgp_per_game = []
-tpp_per_game = []
-points_per_game = []
-assists_per_game = []
-rebounds_per_game = []
-blocks_per_game = []
-steals_per_game = []
-turnovers_per_game = []
+app = Flask(__name__)
+players = []
 
-http_rsp_stats = requests.get(
-    "https://api-nba-v1.p.rapidapi.com/players/statistics?season=" + str(season) + "&id=" + str(id),
-    headers={
-        'x-rapidapi-host': "api-nba-v1.p.rapidapi.com",
-        'x-rapidapi-key': "74cff2d19bmshc82b77265cf59c6p179774jsnc9d690a6ad65"
-    })
-status_code_1 = http_rsp_stats.status_code
 
-if status_code_1 == 200:
-    json = http_rsp_stats.json()
-    for stats_dict in json['response']:
-        try:
-            fgp_per_game.append(float(stats_dict['fgp']))
-            tpp_per_game.append(float(stats_dict['tpp']))
-            points_per_game.append(stats_dict['points'])
-            assists_per_game.append(stats_dict['assists'])
-            rebounds_per_game.append(stats_dict['totReb'])
-            steals_per_game.append(stats_dict['steals'])
-            blocks_per_game.append(stats_dict['blocks'])
-            turnovers_per_game.append(stats_dict['turnovers'])
+# [GET] Jugadores por equipo y temporada
 
-            player_firstname = stats_dict['player']['firstname']
-            player_lastname = stats_dict['player']['lastname']
+@app.route('/api/NBA/players', methods=['GET'])
+def get_player():
+    season = request.args.get('season')
+    team = team_finder(request.args.get('search'))
 
-            team = stats_dict['team']['name']
-            if stats_dict['pos']:
-                position = stats_dict['pos']
-            else:
-                position = None
-        except TypeError:
-            continue
+    http_rsp_player = requests.get(
+        "https://api-nba-v1.p.rapidapi.com/players?season=" + str(season) + "&team=" + str(team),
+        headers={
+            'x-rapidapi-host': "api-nba-v1.p.rapidapi.com",
+            'x-rapidapi-key': "1e5e5821femsh450b4f3086376a6p114414jsne8cc7f313f90"
+        })
+    status_code_2 = http_rsp_player.status_code
 
-    points = round(statistics.mean(points_per_game))
-    fg_percentage = round(statistics.mean(fgp_per_game), 2)
-    tp_percentage = round(statistics.mean(tpp_per_game), 2)
-    assists = round(statistics.mean(assists_per_game))
-    rebounds = round(statistics.mean(rebounds_per_game))
-    steals = round(statistics.mean(steals_per_game))
-    blocks = round(statistics.mean(blocks_per_game))
-    turnovers = round(statistics.mean(turnovers_per_game))
+    if status_code_2 == 200:
+        json = http_rsp_player.json()
+        for player_dict in json['response']:
+            try:
+                players.append(
+                    Players(
+                        player_dict['id'],
+                        player_dict['firstname'],
+                        player_dict['lastname'],
+                        player_dict['birth']['date'],
+                        player_dict['birth']['country'],
+                        player_dict['nba']['pro'],
+                        player_dict['height']['meters'],
+                        player_dict['weight']['kilograms']
+                    )
+                )
+            except TypeError:
+                continue
 
-    player_stats = PlayerStats(player_firstname, player_lastname, team, season, position, points, fg_percentage,
-                               tp_percentage, rebounds, assists, steals, turnovers, blocks)
-    print(player_stats.serialize())
-
+    for player in players:
+        return jsonify({'players': player.serialize(), 'status': 'ok'})
