@@ -1,15 +1,11 @@
-first_name;last_name;date_of_birth;email
-Alejo;Di Lelle;23;adilelle@ucema.edu.ar
-Kevin;Harnan;22;kharnan@ucema.edu.ar
-Ignacio;Freiria;21;ifreiria@ucema.edu.ar
-Catalina;Dapena;20;cdapena@ucema.edu.ar
-
+import csv
 import sqlite3
 
-conn = sqlite3.connect('prueba.sql')
-c = conn.cursor()
+conn = sqlite3.connect('test.db')
 
-c.execute("CREATE TABLE clients (fisrt_name, lastn_name, birth, email)")
+c=conn.cursor()
+
+c.execute("CREATE TABLE IF NOT EXISTS clients (fisrt_name, lastn_name, birth, email)")
 
 with conn:
     c.execute("INSERT INTO clients values (?,?,?,?)", ('Kevin', 'Harnan', 22, 'kharnan@ucema.edu.ar'))
