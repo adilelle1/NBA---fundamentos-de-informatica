@@ -1,3 +1,4 @@
+import random
 import statistics
 from flask import Flask, jsonify, request
 import requests
@@ -14,7 +15,6 @@ clients = load_clients()
 players = []
 
 
-#
 # [GET] Estadística de equipo por temporada
 
 @app.route('/api/NBA/teams', methods=['GET'])
@@ -65,7 +65,6 @@ def get_team():
     return jsonify({'team': team.serialize(), 'status': 'ok'})
 
 
-#
 # [GET] Jugadores por equipo y temporada
 
 @app.route('/api/NBA/players', methods=['GET'])
@@ -104,7 +103,6 @@ def get_player():
         return jsonify({'players': player.serialize(), 'status': 'ok'})
 
 
-#
 # [GET] Estadísticas de jugadores por equipo y temporada
 
 @app.route('/api/NBA/players/stats', methods=['GET'])
@@ -167,7 +165,6 @@ def get_player_stats():
         return jsonify({'players': player_stats.serialize(), 'status': 'ok'})
 
 
-#
 # [GET] Todos los clientes
 
 @app.route("/api/NBA/clients/", methods=['GET'])
@@ -175,7 +172,6 @@ def get_all_clients():
     return jsonify({'players': [cli.serialize() for cli in clients], 'status': 'ok'})
 
 
-#
 # [GET] Clientes por id
 
 @app.route("/api/NBA/clients/<clients_id>", methods=['GET'])
@@ -187,13 +183,18 @@ def get_client(clients_id):
     return jsonify({})
 
 
-#
 # [POST] Crear clientes
+
+# ver si sirve el generador random
+# def generator_id_client():
+#    import uuid
+#    myuuid = uuid.uuid4()
+#    print(str(myuuid))
 
 @app.route("/api/NBA/clients/", methods=['POST'])
 def create_client():
     client = request.json
-
+#   client['id'] = generator_id_client()
     try:
         new_client = Client(
             client['client_id'],
@@ -219,7 +220,6 @@ def create_client():
     return jsonify(new_client.serialize())
 
 
-#
 # [PUT] Actualizar la categoria del cliente
 
 @app.route("/api/NBA/clients/category", methods=['PUT'])
